@@ -1,0 +1,21 @@
+{
+  "name": "monitor-seguridad-web",
+  "version": "0.1.0",
+  "description": "Monitor de seguridad web para organizaciones chicas",
+  "type": "module",
+  "main": "dist/cli.js",
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsc",
+    "start": "node dist/cli.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
