@@ -8,7 +8,7 @@ Proyecto de la Práctica Profesionalizante (Voluntariado autogestionado) de la T
 
 | Chequeo | Tipo | Estado |
 | --- | --- | --- |
-| Certificado SSL/TLS y días hasta su vencimiento | Pasivo | Pendiente |
+| Certificado SSL/TLS y días hasta su vencimiento | Pasivo | En desarrollo |
 | Headers de seguridad (HSTS, CSP, X-Frame-Options, etc.) | Pasivo | Pendiente |
 | Registros de correo (SPF, DKIM, DMARC) | Pasivo | Pendiente |
 | Archivos y rutas expuestas (`.env`, `/admin`, etc.) | Activo | Pendiente |
@@ -22,24 +22,32 @@ Proyecto de la Práctica Profesionalizante (Voluntariado autogestionado) de la T
 
 ## Alcance por etapas
 
-1. CLI que revisa certificado, headers y DNS de un dominio.
-2. Chequeos de archivos expuestos y puertos.
-3. Historial en base de datos y revisiones programadas.
-4. Alertas (Telegram o email) e informe en HTML o PDF.
-5. Panel web.
+El núcleo del proyecto es una **API REST** en Node.js. Cada etapa corresponde a un sprint semanal o quincenal.
+
+| Sprint | Entrega | Endpoints |
+| --- | --- | --- |
+| 1 | Chequeo de vencimiento del certificado SSL, usable desde la terminal | — |
+| 2 | Servidor Express, validación con Zod y manejo de errores | `GET /api/ssl/:dominio` |
+| 3 | Historial de análisis en SQLite, con capas rutas → servicio → datos | `GET /api/analisis` |
+| 4 | Gestión de sitios monitoreados y chequeo de headers | `POST/GET/PUT/DELETE /api/sitios` |
+| 5 | Revisiones automáticas, alertas y chequeos de correo | — |
+| 6 | Panel web en React que consume la API | — |
+
+Los chequeos activos (archivos expuestos y puertos) se suman al final, si el tiempo alcanza.
 
 ## Stack
 
 | Parte | Tecnología | Para qué |
 | --- | --- | --- |
 | Lenguaje | Node.js 22 LTS + TypeScript | Base del proyecto, con tipos para detectar errores antes de ejecutar |
+| API | Express | Servidor HTTP y endpoints REST que exponen los chequeos |
 | CLI | commander | Comandos y opciones desde la terminal |
 | Chequeos | Módulos nativos `tls`, `dns`, `net` y `fetch` | Certificados, registros DNS, puertos y headers sin dependencias externas |
 | Configuración | Zod | Validar el archivo de configuración de cada negocio |
 | Historial | SQLite | Guardar los resultados de cada revisión |
 | Programación | node-cron | Correr las revisiones automáticamente |
 | Alertas | Telegram Bot API o Nodemailer | Avisar cuando algo falla |
-| Panel | Express + React + Tailwind | Ver los sitios y su evolución (etapa 5) |
+| Panel | React + Tailwind | Ver los sitios y su evolución consumiendo la API (sprint 6) |
 | Calidad | Vitest, ESLint, GitHub Actions | Tests, estilo y verificación automática |
 | Gestión | Git, GitHub, Trello (Scrum) | Versionado y sprints semanales |
 | Asistencia | Claude (IA) | Apoyo en planificación, explicaciones y revisión de código |
