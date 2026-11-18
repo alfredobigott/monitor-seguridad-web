@@ -8,7 +8,7 @@ Proyecto de la Práctica Profesionalizante (Voluntariado autogestionado) de la T
 
 | Chequeo | Tipo | Estado |
 | --- | --- | --- |
-| Certificado SSL/TLS y días hasta su vencimiento | Pasivo | En desarrollo |
+| Certificado SSL/TLS y días hasta su vencimiento | Pasivo | Disponible en la CLI |
 | Headers de seguridad (HSTS, CSP, X-Frame-Options, etc.) | Pasivo | Pendiente |
 | Registros de correo (SPF, DKIM, DMARC) | Pasivo | Pendiente |
 | Archivos y rutas expuestas (`.env`, `/admin`, etc.) | Activo | Pendiente |
