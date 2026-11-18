@@ -13,6 +13,25 @@ export interface ResultadoSsl {
 
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
 
+// Tipos de falla posibles. Con un código, quien use la función (la CLI o la API)
+// puede decidir qué hacer sin tener que leer el texto del mensaje.
+export type CodigoErrorSsl =
+  | "DOMINIO_INEXISTENTE"
+  | "SIN_HTTPS"
+  | "TIEMPO_AGOTADO"
+  | "SIN_CERTIFICADO"
+  | "ERROR_CONEXION";
+
+export class ErrorSsl extends Error {
+  constructor(
+    public readonly codigo: CodigoErrorSsl,
+    mensaje: string,
+  ) {
+    super(mensaje);
+    this.name = "ErrorSsl";
+  }
+}
+
 // Cálculo separado de la red: así se puede probar sin conectarse a nada.
 export function calcularDiasRestantes(vence: Date, hoy: Date = new Date()): number {
   return Math.floor((vence.getTime() - hoy.getTime()) / MS_POR_DIA);
@@ -36,7 +55,7 @@ export function revisarCertificado(dominio: string, timeoutMs = 10_000): Promise
 
     socket.setTimeout(timeoutMs, () => {
       socket.destroy();
-      reject(new Error(`El servidor no respondió en ${timeoutMs / 1000} segundos.`));
+      reject(new ErrorSsl("TIEMPO_AGOTADO", `El servidor no respondió en ${timeoutMs / 1000} segundos.`));
     });
 
     socket.once("secureConnect", () => {
@@ -44,7 +63,7 @@ export function revisarCertificado(dominio: string, timeoutMs = 10_000): Promise
       socket.end(); // solo necesitábamos el certificado: cerramos
 
       if (!cert || !cert.valid_to) {
-        reject(new Error("El servidor no envió un certificado."));
+        reject(new ErrorSsl("SIN_CERTIFICADO", "El servidor no envió un certificado."));
         return;
       }
 
@@ -61,11 +80,11 @@ export function revisarCertificado(dominio: string, timeoutMs = 10_000): Promise
 
     socket.once("error", (error: NodeJS.ErrnoException) => {
       if (error.code === "ENOTFOUND") {
-        reject(new Error(`No existe el dominio "${dominio}".`));
+        reject(new ErrorSsl("DOMINIO_INEXISTENTE", `No existe el dominio "${dominio}".`));
       } else if (error.code === "ECONNREFUSED") {
-        reject(new Error(`"${dominio}" no acepta conexiones HTTPS (puerto 443).`));
+        reject(new ErrorSsl("SIN_HTTPS", `"${dominio}" no acepta conexiones HTTPS (puerto 443).`));
       } else {
-        reject(new Error(`No se pudo conectar con "${dominio}": ${error.message}`));
+        reject(new ErrorSsl("ERROR_CONEXION", `No se pudo conectar con "${dominio}": ${error.message}`));
       }
     });
   });

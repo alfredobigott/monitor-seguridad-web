@@ -3,24 +3,24 @@
 
 import { revisarCertificado } from "./checks/ssl.js";
 import { describirResultado } from "./checks/ssl-mensaje.js";
-
-// Un dominio válido: letras, números y guiones, separados por puntos,
-// con una terminación de al menos dos letras (por ejemplo, .com o .ar).
-const formatoDominio = /^(?!-)[a-z0-9-]{1,63}(?<!-)(\.(?!-)[a-z0-9-]{1,63}(?<!-))*\.[a-z]{2,}$/i;
+import { esquemaDominio } from "./validacion.js";
 
 async function main(): Promise<void> {
-  const dominio = process.argv[2]?.trim().toLowerCase();
+  const entrada = process.argv[2];
 
-  if (!dominio) {
+  if (!entrada) {
     console.error("Uso: npm run dev -- <dominio>   (ejemplo: npm run dev -- ejemplo.com)");
     process.exitCode = 1;
     return;
   }
-  if (!formatoDominio.test(dominio)) {
-    console.error(`"${dominio}" no parece un dominio válido.`);
+  // La misma validación que usa la API: una sola regla para toda la herramienta.
+  const validacion = esquemaDominio.safeParse(entrada);
+  if (!validacion.success) {
+    console.error(`"${entrada}": ${validacion.error.issues[0].message}`);
     process.exitCode = 1;
     return;
   }
+  const dominio = validacion.data;
 
   console.log(`Revisando el certificado de ${dominio}...`);
 
